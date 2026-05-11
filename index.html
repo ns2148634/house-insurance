@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金好住2.0｜住宅綜合火險保費試算</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --gold: #c8973a;
+  --gold-light: #e8b85c;
+  --gold-pale: #fdf6e8;
+  --cream: #faf8f4;
+  --red: #c0392b;
+  --green: #1e7e5c;
+  --gray: #6b7280;
+  --border: #e5ddd0;
+  --white: #ffffff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--cream);
+  color: var(--navy);
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--navy);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 300px; height: 300px; border-radius: 50%;
+  border: 40px solid rgba(200,151,58,0.12);
+}
+.header-inner {
+  max-width: 860px; margin: 0 auto; padding: 32px 20px 28px;
+  position: relative; z-index: 1;
+}
+.header-tag {
+  display: inline-block; background: var(--gold); color: white;
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  padding: 4px 12px; border-radius: 2px; margin-bottom: 12px;
+}
+header h1 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: clamp(24px, 5vw, 38px); font-weight: 900;
+  color: white; line-height: 1.25;
+}
+header h1 span { color: var(--gold-light); }
+header p { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 8px; }
+
+/* STEPS */
+.steps-bar {
+  background: white; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.steps-inner {
+  max-width: 860px; margin: 0 auto;
+  display: flex; align-items: center;
+}
+.step-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 8px; cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: 13px; font-weight: 500; color: var(--gray);
+  transition: all .2s; user-select: none;
+}
+.step-tab.active {
+  color: var(--navy); border-bottom-color: var(--gold); font-weight: 700;
+}
+.step-tab.done { color: var(--green); }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  background: #e5e7eb; color: var(--gray);
+  flex-shrink: 0;
+}
+.step-tab.active .step-num { background: var(--gold); color: white; }
+.step-tab.done .step-num { background: var(--green); color: white; }
+@media(max-width: 480px) {
+  .step-tab span:not(.step-num) { display: none; }
+}
+
+/* MAIN */
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* PANELS */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* SECTION TITLE */
+.section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Noto Serif TC', serif; font-size: 17px; font-weight: 700;
+  color: var(--navy); margin-bottom: 18px;
+}
+.section-title::before {
+  content: ''; display: block; width: 4px; height: 22px;
+  background: var(--gold); border-radius: 2px; flex-shrink: 0;
+}
+
+/* CARD */
+.card {
+  background: white; border-radius: 12px; border: 1px solid var(--border);
+  padding: 28px; margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(26,39,68,0.05);
+}
+
+/* PRIORITY 3 OPTIONS (Step 1) */
+.big-options { display: grid; gap: 14px; margin-bottom: 4px; }
+.big-option {
+  border: 2px solid var(--border); border-radius: 12px;
+  padding: 18px 20px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: space-between;
+  background: white;
+}
+.big-option:hover { border-color: var(--gold-light); background: var(--gold-pale); }
+.big-option.selected { border-color: var(--gold); background: var(--gold-pale); }
+.big-option .opt-label { font-size: 15px; font-weight: 700; color: var(--navy); }
+.big-option .opt-desc { font-size: 12px; color: var(--gray); margin-top: 3px; }
+.big-option .opt-check {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .2s;
+}
+.big-option.selected .opt-check { background: var(--gold); border-color: var(--gold); color: white; font-size: 14px; }
+.big-option.selected .opt-check::after { content: '✓'; }
+
+/* PING + UNIT PRICE INPUTS */
+.calc-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+}
+@media(max-width: 500px) { .calc-row { grid-template-columns: 1fr; } }
+
+/* RESULT BOX in step 1 */
+#result-box {
+  background: var(--navy); border-radius: 12px; padding: 24px;
+  color: white; margin-top: 20px; display: none;
+  box-shadow: 0 6px 24px rgba(26,39,68,0.2);
+}
+#result-box.show { display: block; }
+.result-main-label { font-size: 12px; letter-spacing: 1.5px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
+.result-price {
+  font-family: 'Noto Serif TC', serif; font-size: 52px; font-weight: 900;
+  color: var(--gold-light); line-height: 1;
+}
+.result-price .unit { font-size: 18px; font-weight: 400; }
+.result-note { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 6px; }
+.result-detail {
+  margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.detail-item { font-size: 12px; }
+.detail-item .dk { color: rgba(255,255,255,0.55); }
+.detail-item .dv { color: white; font-weight: 600; margin-top: 2px; }
+.warning-box {
+  background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
+  padding: 12px 16px; font-size: 13px; color: #856404; margin-top: 12px;
+}
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width: 560px) { .form-grid { grid-template-columns: 1fr; } .card { padding: 20px 16px; } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 500; color: var(--navy); }
+label .req { color: var(--red); margin-left: 2px; }
+label .hint { color: var(--gray); font-weight: 400; font-size: 12px; margin-left: 4px; }
+input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], select {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'Noto Sans TC', sans-serif; font-size: 14px;
+  color: var(--navy); background: white;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none; appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a2744' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+}
+input:focus, select:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,151,58,0.12);
+}
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-option { position: relative; }
+.radio-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-option label {
+  display: flex; align-items: center; padding: 9px 16px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  color: var(--gray); transition: all .2s; background: white; white-space: nowrap;
+}
+.radio-option input:checked + label {
+  border-color: var(--gold); background: var(--gold-pale);
+  color: var(--navy); font-weight: 700;
+}
+.field-error { font-size: 11px; color: var(--red); margin-top: 3px; display: none; }
+.has-error input, .has-error select { border-color: var(--red) !important; }
+.has-error .field-error { display: block; }
+
+/* NAV BUTTONS */
+.nav-row {
+  display: flex; justify-content: space-between; gap: 12px; margin-top: 8px;
+}
+.btn {
+  padding: 14px 28px; border-radius: 10px; border: none;
+  font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.btn-primary {
+  background: var(--gold); color: white; flex: 1;
+  box-shadow: 0 4px 16px rgba(200,151,58,0.3);
+}
+.btn-primary:hover { background: #b8822e; transform: translateY(-1px); }
+.btn-secondary {
+  background: white; color: var(--navy);
+  border: 1.5px solid var(--border); min-width: 100px;
+}
+.btn-secondary:hover { background: var(--cream); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* SUMMARY CARD step 3 */
+.summary-table { width: 100%; border-collapse: collapse; }
+.summary-table tr { border-bottom: 1px solid var(--border); }
+.summary-table tr:last-child { border-bottom: none; }
+.summary-table td { padding: 10px 4px; font-size: 13px; }
+.summary-table td:first-child { color: var(--gray); width: 40%; }
+.summary-table td:last-child { font-weight: 600; color: var(--navy); }
+.premium-highlight {
+  background: var(--navy); border-radius: 10px; padding: 20px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+}
+.premium-highlight .ph-label { color: rgba(255,255,255,0.7); font-size: 13px; }
+.premium-highlight .ph-price {
+  font-family: 'Noto Serif TC', serif; font-size: 32px; font-weight: 900;
+  color: var(--gold-light);
+}
+
+/* DISCLAIMER */
+.disclaimer {
+  font-size: 11px; color: var(--gray); line-height: 1.7;
+  padding: 12px; background: #f5f3ef; border-radius: 8px;
+  border-left: 3px solid var(--border); margin-top: 12px;
+}
+
+/* SUCCESS */
+#success-panel {
+  text-align: center; padding: 60px 20px;
+}
+.success-icon {
+  width: 80px; height: 80px; background: var(--gold-pale);
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 36px; margin: 0 auto 24px;
+}
+#success-panel h2 {
+  font-family: 'Noto Serif TC', serif; font-size: 26px;
+  font-weight: 800; color: var(--navy); margin-bottom: 12px;
+}
+#success-panel p { font-size: 14px; color: var(--gray); line-height: 1.8; }
+
+/* SPINNER */
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white; border-radius: 50%;
+  animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-tag">南山產物 × 金好住 2.0</div>
+    <h1>住宅綜合火險<br><span>線上保費試算</span></h1>
+    <p>依坪數 × 每坪保額 × 保障組合 → 即時看保費，填資料一鍵送出</p>
+  </div>
+</header>
+
+<!-- STEP BAR -->
+<div class="steps-bar">
+  <div class="steps-inner">
+    <div class="step-tab active" id="tab1" onclick="goStep(1)">
+      <span class="step-num">1</span><span>保費試算</span>
+    </div>
+    <div class="step-tab" id="tab2">
+      <span class="step-num">2</span><span>填寫資料</span>
+    </div>
+    <div class="step-tab" id="tab3">
+      <span class="step-num">3</span><span>確認送出</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== STEP 1: 試算 ===== -->
+<div class="panel active" id="panel1">
+  <div class="card">
+    <div class="section-title">① 選擇保障組合</div>
+    <div class="big-options" id="combo-options">
+      <div class="big-option selected" data-val="A" onclick="selectCombo(this)">
+        <div>
+          <div class="opt-label">組合 A — 基本全方位保障</div>
+          <div class="opt-desc">住家財物損失 ＋ 第三人責任 ＋ 颱風洪水 ＋ 地震基本</div>
+        </div>
+        <div class="opt-check"></div>
+      </div>
+      <div class="big-option" data-val="B" onclick="selectCombo(this)">
+        <div>
+          <div class="opt-label">組合 B — 加強版（含綠能升級）</div>
+          <div class="opt-desc">組合A全部 ＋ 住家綠能升級附加條款（修復不扣折舊）</div>
+        </div>
+        <div class="opt-check"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">② 建築坪數 ＆ 每坪投保金額</div>
+    <div class="calc-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>建築物使用面積 <span class="req">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center">
+          <div style="position:relative">
+            <input type="number" id="area" placeholder="坪" min="2" max="660" step="0.5"
+              oninput="syncArea('ping')" style="padding-right:40px">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--gray);pointer-events:none">坪</span>
+          </div>
+          <div style="text-align:center;color:var(--gray);font-size:13px;font-weight:500;white-space:nowrap">=</div>
+          <div style="position:relative">
+            <input type="number" id="area_sqm" placeholder="m²" min="6.6" max="2178" step="0.1"
+              oninput="syncArea('sqm')" style="padding-right:40px">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--gray);pointer-events:none">m²</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--gray);margin-top:5px">1 坪 ≈ 3.3058 m²　｜　填其中一個，另一個自動換算</div>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label for="price_per_ping">每坪投保金額（萬）<span class="req">*</span></label>
+        <select id="price_per_ping" onchange="calcPremium()">
+          <option value="">請選擇</option>
+          <option value="11.4">11.4 萬／坪</option>
+          <option value="12">12 萬／坪</option>
+          <option value="13">13 萬／坪</option>
+          <option value="14">14 萬／坪</option>
+          <option value="15">15 萬／坪（建議一般公寓）</option>
+          <option value="16">16 萬／坪</option>
+          <option value="17">17 萬／坪</option>
+          <option value="18">18 萬／坪</option>
+          <option value="19">19 萬／坪</option>
+          <option value="20">20 萬／坪（建議精裝豪宅）</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Dynamic result -->
+    <div id="result-box">
+      <div class="result-main-label">▸ 試算保費（年繳）</div>
+      <div class="result-price"><span class="unit">NT$ </span><span id="price-display">–</span></div>
+      <div class="result-note">本試算依DM費率速查表計算，實際保費以公司正式報價為準</div>
+      <div class="result-detail">
+        <div class="detail-item">
+          <div class="dk">保障組合</div>
+          <div class="dv" id="rd-combo">–</div>
+        </div>
+        <div class="detail-item">
+          <div class="dk">使用面積</div>
+          <div class="dv" id="rd-area">–</div>
+        </div>
+        <div class="detail-item">
+          <div class="dk">財物損失保額</div>
+          <div class="dv" id="rd-insured">–</div>
+        </div>
+        <div class="detail-item">
+          <div class="dk">每坪保額</div>
+          <div class="dv" id="rd-unit">–</div>
+        </div>
+      </div>
+    </div>
+    <div id="warn-box" class="warning-box" style="display:none"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-primary" id="step1-next" onclick="step1Next()" disabled>下一步：填寫資料 →</button>
+  </div>
+  <p class="disclaimer" style="margin-top:12px">
+    ※速查表費率適用建築結構「特等（RC/SRC）」且總樓層3樓（含）以上。其他結構/透天厝請洽業務員詳細報價。<br>
+    ※財產保額超過1,200萬，敬請另行投保住宅火災保險。
+  </p>
+</div>
+
+<!-- ===== STEP 2: 填資料 ===== -->
+<div class="panel" id="panel2">
+  <div class="card">
+    <div class="section-title">房屋資料</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label for="f-address">建物地址 <span class="req">*</span></label>
+        <input type="text" id="f-address" placeholder="例：台北市信義區松仁路123號5樓">
+        <div class="field-error">請輸入建物地址</div>
+      </div>
+      <div class="form-group">
+        <label for="f-structure">建物結構 <span class="req">*</span></label>
+        <select id="f-structure">
+          <option value="">請選擇</option>
+          <option value="磚造">磚造</option>
+          <option value="加強磚造">加強磚造</option>
+          <option value="鋼筋混泥土">鋼筋混泥土（RC）</option>
+          <option value="鋼骨混泥土">鋼骨混泥土（SRC）</option>
+        </select>
+        <div class="field-error">請選擇建物結構</div>
+      </div>
+      <div class="form-group">
+        <label for="f-built-year">建築物建造年份 <span class="req">*</span></label>
+        <input type="number" id="f-built-year" placeholder="例：1995" min="1900" max="2025">
+        <div class="field-error">請輸入有效年份</div>
+      </div>
+      <div class="form-group">
+        <label for="f-floor-total">建築物總樓層數 <span class="req">*</span></label>
+        <input type="number" id="f-floor-total" placeholder="例：5" min="1" max="100">
+        <div class="field-error">請輸入總樓層數</div>
+      </div>
+      <div class="form-group">
+        <label>其他樓層有無營業 <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-option">
+            <input type="radio" name="commercial" id="com-yes" value="有">
+            <label for="com-yes">有</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="commercial" id="com-no" value="無" checked>
+            <label for="com-no">無</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 抵押權人 -->
+      <div class="form-group full" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+        <label>抵押權人<span class="hint">（無貸款可不填）</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center">
+          <input type="text" id="f-mortgagee-name" placeholder="抵押權人姓名／機構">
+          <input type="text" id="f-mortgagee-bank" placeholder="銀行名稱">
+          <input type="text" id="f-mortgagee-branch" placeholder="分行名稱">
+        </div>
+      </div>
+
+      <!-- 貸款戶 -->
+      <div class="form-group full">
+        <label>貸款戶類型<span class="hint">（無貸款可不選）</span></label>
+        <div class="radio-group">
+          <div class="radio-option">
+            <input type="radio" name="loan_type" id="lt-none" value="" checked>
+            <label for="lt-none">無貸款</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="loan_type" id="lt-1" value="新貸">
+            <label for="lt-1">1. 新貸</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="loan_type" id="lt-2" value="增貸/續貸">
+            <label for="lt-2">2. 增貸／續貸</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="loan_type" id="lt-3" value="轉貸">
+            <label for="lt-3">3. 轉貸</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="loan_type" id="lt-6" value="次順位貸款">
+            <label for="lt-6">6. 次順位貸款</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">要保人資料</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="f-name">姓名 <span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="請輸入真實姓名">
+        <div class="field-error">請輸入姓名</div>
+      </div>
+      <div class="form-group">
+        <label for="f-id">身份證字號 <span class="req">*</span></label>
+        <input type="text" id="f-id" placeholder="A123456789" maxlength="10">
+        <div class="field-error">請輸入有效身份證字號（1碼英文+9碼數字）</div>
+      </div>
+      <div class="form-group">
+        <label for="f-birthday">出生年月日 <span class="req">*</span></label>
+        <input type="date" id="f-birthday" max="2010-01-01">
+        <div class="field-error">請選擇出生日期</div>
+      </div>
+      <div class="form-group">
+        <label for="f-phone">手機號碼 <span class="req">*</span></label>
+        <input type="tel" id="f-phone" placeholder="09xx-xxx-xxx" maxlength="10">
+        <div class="field-error">請輸入有效手機號碼（09開頭10碼）</div>
+      </div>
+      <div class="form-group full">
+        <label for="f-contact-addr">連絡地址 <span class="req">*</span></label>
+        <input type="text" id="f-contact-addr" placeholder="如與建物地址相同可複製填入">
+        <div class="field-error">請輸入連絡地址</div>
+      </div>
+      <div class="form-group full">
+        <label for="f-remarks">備註<span class="hint">（選填）</span></label>
+        <input type="text" id="f-remarks" placeholder="如有特殊需求請說明">
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goStep(1)">← 返回試算</button>
+    <button class="btn btn-primary" onclick="step2Next()">下一步：確認送出 →</button>
+  </div>
+</div>
+
+<!-- ===== STEP 3: 確認 ===== -->
+<div class="panel" id="panel3">
+  <div class="card">
+    <div class="section-title">試算保費確認</div>
+    <div class="premium-highlight">
+      <div>
+        <div class="ph-label">年繳保費（試算）</div>
+        <div class="ph-price" id="confirm-price">–</div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:rgba(255,255,255,0.6);font-size:12px">保障組合</div>
+        <div style="color:var(--gold-light);font-weight:700;font-size:16px;margin-top:4px" id="confirm-combo">–</div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:8px">房屋 ＆ 要保人資料</div>
+    <table class="summary-table" id="summary-table"></table>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goStep(2)">← 返回修改</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitAll()">📩 確認送出</button>
+  </div>
+  <p class="disclaimer" style="margin-top:12px">
+    ※送出後業務專員將於1個工作日內與您聯繫，提供正式保費與投保說明。<br>
+    ※本試算保費僅供參考，實際保費以南山產物公司正式報價為準。
+  </p>
+</div>
+
+<!-- ===== SUCCESS ===== -->
+<div class="panel" id="panel-success">
+  <div id="success-panel">
+    <div class="success-icon">✅</div>
+    <h2>申請已送出！</h2>
+    <p>
+      感謝您的試算申請，<br>
+      業務專員將於 <strong>1個工作日內</strong> 與您聯繫，<br>
+      提供正式保費報價與投保說明。<br><br>
+      如有急迫需求，歡迎來電洽詢。
+    </p>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ============================================================
+//  ★ 請將下方 WEBAPP_URL 換成您部署後的 Apps Script Web App 網址 ★
+// ============================================================
+const WEBAPP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE';
+
+// ============================================================
+//  費率速查表 (來源：DM 保費速查表，單位：NT$)
+//  鍵值 = 財物損失保額（萬元）
+//  值 = { A: 組合A保費, B: 組合B保費 }
+// ============================================================
+const RATE_TABLE = {
+  350:  { A: 2691, B: 3088 },
+  400:  { A: 2707, B: 3104 },
+  450:  { A: 2723, B: 3120 },
+  500:  { A: 2740, B: 3137 },
+  550:  { A: 2756, B: 3153 },
+  600:  { A: 2772, B: 3169 },
+  650:  { A: 2788, B: 3185 },
+  700:  { A: 2805, B: 3202 },
+  750:  { A: 2821, B: 3218 },
+  800:  { A: 2837, B: 3234 },
+  850:  { A: 2853, B: 3250 },
+  900:  { A: 2869, B: 3266 },
+  950:  { A: 2886, B: 3283 },
+  1000: { A: 2902, B: 3299 },
+  1050: { A: 2918, B: 3315 },
+  1100: { A: 2934, B: 3331 },
+  1150: { A: 2950, B: 3347 },
+  1200: { A: 2967, B: 3364 },
+};
+
+// 找最接近的保額對應費率
+function findRate(insuredMill, combo) {
+  const keys = Object.keys(RATE_TABLE).map(Number).sort((a,b)=>a-b);
+  let best = keys[0];
+  for (const k of keys) { if (insuredMill >= k) best = k; else break; }
+  return RATE_TABLE[best][combo];
+}
+
+// state
+let currentStep = 1;
+let calcResult = null; // { combo, area, pricePerPing, insuredAmt, premium }
+
+// -------- COMBO SELECT --------
+function selectCombo(el) {
+  document.querySelectorAll('.big-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  calcPremium();
+}
+function getCombo() {
+  return document.querySelector('.big-option.selected')?.dataset.val || 'A';
+}
+
+// -------- SYNC PING ↔ SQM --------
+const PING_TO_SQM = 3.30579;
+function syncArea(source) {
+  const pingEl = document.getElementById('area');
+  const sqmEl  = document.getElementById('area_sqm');
+  if (source === 'ping') {
+    const v = parseFloat(pingEl.value);
+    sqmEl.value = isNaN(v) ? '' : (v * PING_TO_SQM).toFixed(2);
+  } else {
+    const v = parseFloat(sqmEl.value);
+    pingEl.value = isNaN(v) ? '' : (v / PING_TO_SQM).toFixed(2);
+  }
+  calcPremium();
+}
+
+// -------- CALC --------
+function calcPremium() {
+  const area = parseFloat(document.getElementById('area').value);
+  const ppp = parseFloat(document.getElementById('price_per_ping').value);
+  const combo = getCombo();
+  const resultBox = document.getElementById('result-box');
+  const warnBox = document.getElementById('warn-box');
+  const nextBtn = document.getElementById('step1-next');
+
+  warnBox.style.display = 'none';
+  resultBox.classList.remove('show');
+  nextBtn.disabled = true;
+
+  if (!area || !ppp || area < 2) return;
+
+  // 計算財物損失保額
+  const insuredMill = Math.round(area * ppp); // 萬元（取整）
+
+  if (insuredMill > 1200) {
+    warnBox.textContent = `⚠️ 試算保額約 ${insuredMill.toLocaleString()} 萬元，超過1,200萬，請改投保住宅火災保險，或洽業務員另行報價。`;
+    warnBox.style.display = 'block';
+    return;
+  }
+
+  const baseRate = findRate(insuredMill, combo);
+
+  // 面積調整：速查表基準約30坪，保費有固定成本部分不隨面積等比
+  // 固定成分（地震、第三人責任）約佔35%，浮動（財物損失、颱洪）約65%
+  const fixedFraction = 0.35;
+  const areaRatio = fixedFraction + (1 - fixedFraction) * (area / 30);
+  const clampedRatio = Math.max(0.6, Math.min(3.0, areaRatio));
+  const premium = Math.round(baseRate * clampedRatio);
+
+  calcResult = { combo, area, sqm: parseFloat((area * PING_TO_SQM).toFixed(2)), pricePerPing: ppp, insuredAmt: insuredMill, premium };
+
+  document.getElementById('price-display').textContent = premium.toLocaleString();
+  document.getElementById('rd-combo').textContent = `組合 ${combo}`;
+  const sqmDisplay = (area * PING_TO_SQM).toFixed(1);
+  document.getElementById('rd-area').textContent = `${area} 坪（${sqmDisplay} m²）`;
+  document.getElementById('rd-insured').textContent = `${insuredMill.toLocaleString()} 萬元`;
+  document.getElementById('rd-unit').textContent = `${ppp} 萬／坪`;
+
+  resultBox.classList.add('show');
+  nextBtn.disabled = false;
+}
+
+// -------- STEP NAVIGATION --------
+function goStep(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach((t,i) => {
+    t.classList.remove('active','done');
+    if (i + 1 < n) t.classList.add('done');
+    if (i + 1 === n) t.classList.add('active');
+  });
+  document.getElementById(`panel${n}`).classList.add('active');
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function step1Next() {
+  if (!calcResult) return;
+  goStep(2);
+}
+
+function step2Next() {
+  if (!validateStep2()) return;
+  buildSummary();
+  goStep(3);
+}
+
+// -------- VALIDATE STEP 2 --------
+function validateStep2() {
+  let ok = true;
+  const checks = [
+    { id: 'f-address',      type: 'text',   msg: '請輸入建物地址' },
+    { id: 'f-structure',    type: 'select', msg: '請選擇建物結構' },
+    { id: 'f-built-year',   type: 'number', min: 1900, max: 2025, msg: '請輸入有效年份（1900～2025）' },
+    { id: 'f-floor-total',  type: 'number', min: 1, max: 100,    msg: '請輸入總樓層數' },
+    { id: 'f-name',         type: 'text',   msg: '請輸入姓名' },
+    { id: 'f-id',           type: 'id',     msg: '請輸入有效身份證字號（1碼英文+9碼數字）' },
+    { id: 'f-birthday',     type: 'text',   msg: '請選擇出生日期' },
+    { id: 'f-phone',        type: 'phone',  msg: '請輸入有效手機號碼（09開頭10碼）' },
+    { id: 'f-contact-addr', type: 'text',   msg: '請輸入連絡地址' },
+  ];
+  checks.forEach(f => {
+    const el = document.getElementById(f.id);
+    const grp = el.closest('.form-group');
+    grp.classList.remove('has-error');
+    grp.querySelector('.field-error').textContent = f.msg;
+    const val = el.value.trim();
+    let valid = true;
+    if (f.type === 'select') valid = val !== '';
+    else if (f.type === 'number') { const n = Number(val); valid = val !== '' && !isNaN(n) && n >= f.min && n <= f.max; }
+    else if (f.type === 'text') valid = val.length > 0;
+    else if (f.type === 'phone') valid = /^09\d{8}$/.test(val);
+    else if (f.type === 'id') valid = /^[A-Z][12]\d{8}$/i.test(val);
+    if (!valid) { grp.classList.add('has-error'); ok = false; }
+  });
+  if (!ok) document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  return ok;
+}
+
+// -------- BUILD SUMMARY --------
+function buildSummary() {
+  const r = calcResult;
+  document.getElementById('confirm-price').textContent = `NT$ ${r.premium.toLocaleString()}`;
+  document.getElementById('confirm-combo').textContent = `組合 ${r.combo}`;
+
+  const rows = [
+    ['使用面積', `${r.area} 坪（${r.sqm} m²）`],
+    ['每坪保額', `${r.pricePerPing} 萬`],
+    ['財物損失保額', `${r.insuredAmt.toLocaleString()} 萬元`],
+    ['---', ''],
+    ['建物地址', document.getElementById('f-address').value],
+    ['建物結構', document.getElementById('f-structure').value],
+    ['建造年份', document.getElementById('f-built-year').value],
+    ['總樓層數', document.getElementById('f-floor-total').value + ' 層'],
+    ['其他樓層營業', document.querySelector('input[name="commercial"]:checked')?.value || '–'],
+    ['抵押權人', [document.getElementById('f-mortgagee-name').value, document.getElementById('f-mortgagee-bank').value, document.getElementById('f-mortgagee-branch').value].filter(Boolean).join('　') || '無'],
+    ['貸款戶類型', document.querySelector('input[name="loan_type"]:checked')?.value || '無貸款'],
+    ['---', ''],
+    ['要保人', document.getElementById('f-name').value],
+    ['身份證字號', document.getElementById('f-id').value],
+    ['出生年月日', document.getElementById('f-birthday').value],
+    ['手機', document.getElementById('f-phone').value],
+    ['連絡地址', document.getElementById('f-contact-addr').value],
+  ];
+
+  const table = document.getElementById('summary-table');
+  table.innerHTML = rows.map(([k,v]) =>
+    k === '---'
+      ? `<tr><td colspan="2" style="padding:4px 0;border-bottom:2px solid var(--border)"></td></tr>`
+      : `<tr><td>${k}</td><td>${v}</td></tr>`
+  ).join('');
+}
+
+// -------- SUBMIT --------
+async function submitAll() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送出中…';
+
+  const r = calcResult;
+  const payload = {
+    combo:        `組合${r.combo}`,
+    area:         r.area,
+    area_sqm:     r.sqm,
+    price_per_ping: r.pricePerPing,
+    insured_amt:  r.insuredAmt,
+    premium:      r.premium,
+    address:      document.getElementById('f-address').value,
+    structure:    document.getElementById('f-structure').value,
+    built_year:   document.getElementById('f-built-year').value,
+    floor_total:  document.getElementById('f-floor-total').value,
+    commercial:   document.querySelector('input[name="commercial"]:checked')?.value,
+    mortgagee:    [document.getElementById('f-mortgagee-name').value, document.getElementById('f-mortgagee-bank').value, document.getElementById('f-mortgagee-branch').value].filter(Boolean).join(' '),
+    loan_type:    document.querySelector('input[name="loan_type"]:checked')?.value || '無貸款',
+    name:         document.getElementById('f-name').value,
+    id_num:       document.getElementById('f-id').value,
+    birthday:     document.getElementById('f-birthday').value,
+    phone:        document.getElementById('f-phone').value,
+    contact_addr: document.getElementById('f-contact-addr').value,
+    remarks:      document.getElementById('f-remarks').value,
+  };
+
+  try {
+    if (WEBAPP_URL && WEBAPP_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE') {
+      await fetch(WEBAPP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      console.log('📋 試算資料（請先設定 WEBAPP_URL）：', payload);
+      await new Promise(r => setTimeout(r, 800));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  // Show success regardless (no-cors can't read response)
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => { t.classList.remove('active'); t.classList.add('done'); });
+  document.getElementById('panel-success').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
