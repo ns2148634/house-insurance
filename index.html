@@ -511,11 +511,24 @@ input:focus, select:focus {
         <input type="tel" id="f-phone" placeholder="09xx-xxx-xxx" maxlength="10">
         <div class="field-error">請輸入有效手機號碼（09開頭10碼）</div>
       </div>
-      <div class="form-group full">
+     <div class="form-group full">
         <label for="f-contact-addr">連絡地址 <span class="req">*</span></label>
         <input type="text" id="f-contact-addr" placeholder="如與建物地址相同可複製填入">
         <div class="field-error">請輸入連絡地址</div>
       </div>
+      
+      <!-- 新增：預計生效日與服務人員姓名 -->
+      <div class="form-group">
+        <label for="f-effective-date">預計生效日 <span class="req">*</span></label>
+        <input type="date" id="f-effective-date">
+        <div class="field-error">請選擇預計生效日</div>
+      </div>
+      <div class="form-group">
+        <label for="f-agent-name">服務人員姓名 <span class="req">*</span></label>
+        <input type="text" id="f-agent-name" placeholder="例：光辰團隊 - 姓名">
+        <div class="field-error">請輸入服務人員姓名</div>
+      </div>
+      
       <div class="form-group full">
         <label for="f-remarks">備註<span class="hint">（選填）</span></label>
         <input type="text" id="f-remarks" placeholder="如有特殊需求請說明">
